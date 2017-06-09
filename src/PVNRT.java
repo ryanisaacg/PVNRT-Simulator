@@ -18,4 +18,8 @@ public class PVNRT {
 	public static double getMoles(double p, double v, double t) {
 		return p * v / (t * r);
 	}
+	
+	public static double getWork(double pStart, double pFinal, double dv) {
+		return (pStart + pFinal) / 2 * dv;
+	}
 }
