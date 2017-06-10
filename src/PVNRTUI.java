@@ -1,4 +1,8 @@
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -13,7 +17,7 @@ public class PVNRTUI
 	public double temperature, volume, pressure;
 	JLabel tempLabel, volumeLabel, pressureLabel;
 	JSlider tempSlider, volumeSlider, pressureSlider;
-	JCheckBox tempLock, volumeLock, pressureLock;
+	public JCheckBox tempLock, volumeLock, pressureLock;
 	
 	public static void main(String[] args)
 	{
@@ -75,7 +79,28 @@ public class PVNRTUI
 					}
 				});
 				
+				JPanel p = this;
+				Timer t = new Timer();
+				t.scheduleAtFixedRate(new TimerTask(){
+					public void run()
+					{
+						p.repaint();
+					}
+				}, 0, 1000/60);
+				
 				this.setPreferredSize(new Dimension(440, 400));
+			}
+			
+			public void paintComponent(Graphics g)
+			{
+				super.paintComponent(g);
+				g.drawLine(109, 149, 109, 350);
+				g.drawLine(109, 350, 310, 350);
+				g.drawLine(310, 350, 310, 149);
+
+				g.setColor(new Color(100, 100, 100));
+				g.drawLine(110, (int)(350 - volume/5 - 1), 309, (int)(350 - volume/5 - 1));
+				g.fillRect(200, (int)(350 - volume/5 - 60), 20, 60);
 			}
 		});
 		
