@@ -73,7 +73,7 @@ public class PVNRTUI
 		tempSlider.setEnabled(false);
 		container.setIsothermal();
 		
-		format = new DecimalFormat("0000");
+		format = new DecimalFormat("0.00E0");
 		refreshLabelValues();
 		refreshSliderValues();
 		
