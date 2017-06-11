@@ -24,15 +24,15 @@ public class PVNRT {
 	}
 	
 	public static void update(PVNRTUI p) {
-		boolean pLock = p.pressureLock.isSelected();
-		boolean vLock = p.volumeLock.isSelected();
-		boolean tLock = p.tempLock.isSelected();
-		if(pLock && vLock && !tLock) {
-			p.temperature = getVolume(p.pressure, p.volume, 1);
-		} else if(!pLock && vLock && tLock) {
-			p.pressure = getPressure(p.volume, 1, p.temperature);
-		} else if(pLock && !vLock && tLock) {
-			p.volume = getVolume(p.pressure, 1, p.temperature);
-		}
+		boolean pLock = !p.pressureLock.isSelected();
+		boolean vLock = !p.volumeLock.isSelected();
+		boolean tLock = !p.tempLock.isSelected();
+//		if(pLock && vLock && !tLock) {
+//			p.temperature = getVolume(p.pressure, p.volume, 1);
+//		} else if(!pLock && vLock && tLock) {
+//			p.pressure = getPressure(p.volume, 1, p.temperature);
+//		} else if(pLock && !vLock && tLock) {
+//			p.volume = getVolume(p.pressure, 1, p.temperature);
+//		}
 	}
 }

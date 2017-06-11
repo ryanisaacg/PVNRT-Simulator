@@ -1,51 +1,69 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.JCheckBox;
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class PVNRTUI
 {
-	public double temperature, volume, pressure;
+	Container container;
 	JLabel tempLabel, volumeLabel, pressureLabel;
 	JSlider tempSlider, volumeSlider, pressureSlider;
-	public JCheckBox tempLock, volumeLock, pressureLock;
+	public JRadioButton tempLock, volumeLock, pressureLock;
+	private DecimalFormat format;
 	
 	public static void main(String[] args)
 	{
 		new PVNRTUI();
 	}
 	
+	private void refreshLabelValues()
+	{
+		tempLabel.setText(format.format(container.getTemperature()) + "K");
+		volumeLabel.setText(format.format(container.getVolume()) + "m^3");
+		pressureLabel.setText(format.format(container.getPressure()) + "kPa");
+	}
+	
+	private void refreshSliderValues()
+	{
+		tempSlider.setValue((int)container.getTemperature());
+		volumeSlider.setValue((int)container.getVolume());
+		pressureSlider.setValue((int)container.getPressure());
+	}
+	
 	public PVNRTUI()
 	{
-		temperature = 1;
-		volume = 1;
-		pressure = 1;
-		tempLabel = new JLabel(temperature + " K");
-		volumeLabel = new JLabel(volume + " m^3");
-		pressureLabel = new JLabel(pressure + " Pa");
+		container = new Container();
+		tempLabel = new JLabel();
+		volumeLabel = new JLabel();
+		pressureLabel = new JLabel();
 		tempSlider = new JSlider(1, 500, 1);
 		volumeSlider = new JSlider(1, 1000, 1);
 		pressureSlider = new JSlider(1, 1000, 1);
-		tempLock = new JCheckBox("Temperature Independent");
-		volumeLock = new JCheckBox("Volume Independent");
-		pressureLock = new JCheckBox("Pressure Independent");
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(tempLock = new JRadioButton("Isothermic"));
+		bg.add(volumeLock = new JRadioButton("Isochoric"));
+		bg.add(pressureLock = new JRadioButton("Isobaric"));
+		tempLock.setSelected(true);
+		tempSlider.setEnabled(false);
+		container.setIsothermal();
+		
+		format = new DecimalFormat("0.###E0");
+		refreshLabelValues();
+		refreshSliderValues();
 		
 		JFrame frame = new JFrame("PV = nRT");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		PVNRTUI pvnrtUI = this;
-		
 		frame.getContentPane().add(new JPanel(){
-			private static final long serialVersionUID = -8266151342944832435L;
+			private static final long serialVersionUID = 1L;
 			
 			//Constructor
 			{
@@ -60,29 +78,20 @@ public class PVNRTUI
 				this.add(pressureSlider);
 				this.add(pressureLock);
 
-				tempSlider.addChangeListener(new ChangeListener(){
-					public void stateChanged(ChangeEvent e)
-					{
-						temperature = tempSlider.getValue();
-						tempLabel.setText(temperature + " K");
-						refresh();
-					}
+				tempSlider.addChangeListener(e -> {
+					container.setTemperature(tempSlider.getValue());
+					refreshLabelValues();
+					refreshSliderValues();
 				});
-				volumeSlider.addChangeListener(new ChangeListener(){
-					public void stateChanged(ChangeEvent e)
-					{
-						volume = volumeSlider.getValue();
-						volumeLabel.setText(volume + " m^3");
-						refresh();
-					}
+				volumeSlider.addChangeListener(e -> {
+					container.setVolume(volumeSlider.getValue());
+					refreshLabelValues();
+					refreshSliderValues();
 				});
-				pressureSlider.addChangeListener(new ChangeListener(){
-					public void stateChanged(ChangeEvent e)
-					{
-						pressure = pressureSlider.getValue();
-						pressureLabel.setText(pressure+ " kPa");
-						refresh();
-					}
+				pressureSlider.addChangeListener(e -> {
+					container.setPressure(pressureSlider.getValue());
+					refreshLabelValues();
+					refreshSliderValues();
 				});
 				
 				Timer t = new Timer();
@@ -90,22 +99,10 @@ public class PVNRTUI
 					public void run()
 					{
 						p.repaint();
-						PVNRT.update(pvnrtUI);
-						refresh();
 					}
 				}, 0, 1000/60);
 				
 				this.setPreferredSize(new Dimension(440, 400));
-			}
-			
-			public void refresh()
-			{
-				tempSlider.setValue((int)temperature);
-				volumeSlider.setValue((int)volume);
-				pressureSlider.setValue((int)pressure);
-				tempLabel.setText(temperature + " K");
-				volumeLabel.setText(volume + " m^3");
-				pressureLabel.setText(pressure+ " kPa");
 			}
 			
 			public void paintComponent(Graphics g)
@@ -120,7 +117,7 @@ public class PVNRTUI
 				g.fillRect(310, 333, 12, 3);
 				g.setColor(Color.red);
 				g.fillOval(321, 331, 13, 13);
-				g.fillRoundRect(325, (int)(330 - temperature*75/500), 6, (int)(5+temperature*75/500), 3, 3);
+				g.fillRoundRect(325, (int)(330 - container.getTemperature() *75/500), 6, (int)(5+container.getTemperature()*75/500), 3, 3);
 				
 				//Pressure Gauge
 				g.setColor(new Color(100, 100, 100));
@@ -136,8 +133,8 @@ public class PVNRTUI
 				g.drawLine(63, 325, 98, 325);
 				g.setColor(Color.black);
 				g.drawOval(60, 295, 40, 40);
-				g.drawLine(80, 325, 80+(int)(22*(Math.cos(Math.toRadians(160 - pressure*140/1000)))),
-						325-(int)(22*(Math.sin(Math.toRadians(160 - pressure*140/1000)))));
+				g.drawLine(80, 325, 80+(int)(22*(Math.cos(Math.toRadians(160 - container.getPressure() *140/1000)))),
+						325-(int)(22*(Math.sin(Math.toRadians(160 - container.getPressure()*140/1000)))));
 
 				//Container
 				g.drawLine(109, 149, 109, 350);
@@ -146,8 +143,8 @@ public class PVNRTUI
 
 				//Piston
 				g.setColor(new Color(100, 100, 100));
-				g.drawLine(110, (int)(350 - volume/5 - 1), 309, (int)(350 - volume/5 - 1));
-				g.fillRect(200, (int)(350 - volume/5 - 60), 20, 60);
+				g.drawLine(110, (int)(350 - container.getVolume() /5 - 1), 309, (int)(350 - container.getVolume() /5 - 1));
+				g.fillRect(200, (int)(350 - container.getVolume() /5 - 60), 20, 60);
 			}
 		});
 		
