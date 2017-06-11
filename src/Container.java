@@ -19,7 +19,7 @@ public class Container
 	{
 		temperature = 273;
 		state = State.ISOTHERMAL;
-		setVolume(1);
+		setVolume(10);
 	}
 	
 	public void setIsobaric()
@@ -54,12 +54,12 @@ public class Container
 	
 	public void setPressure(double pressure)
 	{
-		this.pressure = pressure;
+		this.pressure = Math.max(1, pressure);
 		switch(state) {
 		case ISOBARIC:
 			throw new RuntimeException("The container is isobaric; you can't change its pressure.");
 		case ISOCHORIC:
-			temperature =  pressure * volume / (n * r);
+			temperature = (pressure * volume) / (n * r);
 			break;
 		case ISOTHERMAL:
 			volume = n * r * temperature / pressure;
@@ -69,10 +69,10 @@ public class Container
 	
 	public void setVolume(double volume) 
 	{
-		this.volume = volume;
+		this.volume = Math.max(1, volume);
 		switch(state) {
 		case ISOBARIC:
-			temperature = n * r * temperature / pressure;
+			temperature = (pressure * volume) / (n * r);
 			break;
 		case ISOCHORIC:
 			throw new RuntimeException("The container is isochoric; you can't change its volume.");
@@ -80,12 +80,11 @@ public class Container
 			pressure = n * r * temperature / volume;
 			break;
 		}
-		System.out.println(pressure);
 	}
 	
 	public void setTemperature(double temperature) 
 	{
-		this.temperature = temperature;
+		this.temperature = Math.max(1, temperature);
 		switch(state) {
 		case ISOBARIC:
 			volume = n * r * temperature / pressure;
