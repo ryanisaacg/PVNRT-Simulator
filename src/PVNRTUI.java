@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,16 +45,30 @@ public class PVNRTUI
 	public PVNRTUI()
 	{
 		container = new Container();
-		tempLabel = new JLabel();
-		volumeLabel = new JLabel();
-		pressureLabel = new JLabel();
-		tempSlider = new JSlider(1, 500, (int)container.getTemperature());
-		volumeSlider = new JSlider(1, 1000, (int)container.getVolume());
-		pressureSlider = new JSlider(1, 1000, (int)container.getPressure());
+		//Create the radio buttons to control which variable is held constant
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(tempLock = new JRadioButton("Isothermic"));
 		bg.add(volumeLock = new JRadioButton("Isochoric"));
 		bg.add(pressureLock = new JRadioButton("Isobaric"));
+		//Create the temperature controls
+		JPanel tempPanel = new JPanel();
+		tempPanel.setLayout(new BoxLayout(tempPanel, BoxLayout.X_AXIS));
+		tempPanel.add(tempLabel = new JLabel());
+		tempPanel.add(tempSlider = new JSlider(1, 500, (int)container.getTemperature()));
+		tempPanel.add(tempLock);
+		//Create the volume controls
+		JPanel volumePanel = new JPanel();
+		volumePanel.setLayout(new BoxLayout(volumePanel, BoxLayout.X_AXIS));
+		volumePanel.add(volumeLabel = new JLabel());
+		volumePanel.add(volumeSlider = new JSlider(1, 1000, 1));
+		volumePanel.add(volumeLock);
+		//Create the pressure controls
+		JPanel pressurePanel = new JPanel();
+		pressurePanel.setLayout(new BoxLayout(pressurePanel, BoxLayout.X_AXIS));
+		pressurePanel.add(pressureLabel = new JLabel());
+		pressurePanel.add(pressureSlider = new JSlider(1, 1000, 1));
+		pressurePanel.add(pressureLock);
+		
 		tempLock.setSelected(true);
 		tempSlider.setEnabled(false);
 		container.setIsothermal();
@@ -65,71 +80,66 @@ public class PVNRTUI
 		JFrame frame = new JFrame("PV = nRT");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		tempSlider.addChangeListener(e -> {
+			if(lockEvent) return;
+			container.setTemperature(tempSlider.getValue());
+			refreshLabelValues();
+			refreshSliderValues();
+		});
+		volumeSlider.addChangeListener(e -> {
+			if(lockEvent) return;
+			container.setVolume(volumeSlider.getValue());
+			refreshLabelValues();
+			refreshSliderValues();
+		});
+		pressureSlider.addChangeListener(e -> {
+			if(lockEvent) return;
+			container.setPressure(pressureSlider.getValue());
+			refreshLabelValues();
+			refreshSliderValues();
+		});
+		tempLock.addChangeListener(e -> 
+		{
+			if(tempLock.isSelected())
+			{
+				volumeSlider.setEnabled(true);
+				pressureSlider.setEnabled(true);
+				tempSlider.setEnabled(false);
+				container.setIsothermal();
+			}
+		});
+		volumeLock.addChangeListener(e -> 
+		{
+			if(volumeLock.isSelected())
+			{
+				volumeSlider.setEnabled(false);
+				pressureSlider.setEnabled(true);
+				tempSlider.setEnabled(true);
+				container.setIsochoric();
+			}
+		});
+		pressureLock.addChangeListener(e -> 
+		{
+			if(pressureLock.isSelected())
+			{
+				System.out.println("!");
+				volumeSlider.setEnabled(true);
+				pressureSlider.setEnabled(false);
+				tempSlider.setEnabled(true);
+				container.setIsobaric();
+			}
+		});
+		
 		frame.getContentPane().add(new JPanel(){
 			private static final long serialVersionUID = 1L;
 			
 			//Constructor
 			{
 				JPanel p = this;
-				this.add(tempLabel);
-				this.add(tempSlider);
-				this.add(tempLock);
-				this.add(volumeLabel);
-				this.add(volumeSlider);
-				this.add(volumeLock);
-				this.add(pressureLabel);
-				this.add(pressureSlider);
-				this.add(pressureLock);
-
-				tempSlider.addChangeListener(e -> {
-					if(lockEvent) return;
-					container.setTemperature(tempSlider.getValue());
-					refreshLabelValues();
-					refreshSliderValues();
-				});
-				volumeSlider.addChangeListener(e -> {
-					if(lockEvent) return;
-					container.setVolume(volumeSlider.getValue());
-					refreshLabelValues();
-					refreshSliderValues();
-				});
-				pressureSlider.addChangeListener(e -> {
-					if(lockEvent) return;
-					container.setPressure(pressureSlider.getValue());
-					refreshLabelValues();
-					refreshSliderValues();
-				});
-				tempLock.addChangeListener(e -> 
-				{
-					if(tempLock.isSelected())
-					{
-						volumeSlider.setEnabled(true);
-						pressureSlider.setEnabled(true);
-						tempSlider.setEnabled(false);
-						container.setIsothermal();
-					}
-				});
-				volumeLock.addChangeListener(e -> 
-				{
-					if(volumeLock.isSelected())
-					{
-						volumeSlider.setEnabled(false);
-						pressureSlider.setEnabled(true);
-						tempSlider.setEnabled(true);
-						container.setIsochoric();
-					}
-				});
-				pressureLock.addChangeListener(e -> 
-				{
-					if(pressureLock.isSelected())
-					{
-						System.out.println("!");
-						volumeSlider.setEnabled(true);
-						pressureSlider.setEnabled(false);
-						tempSlider.setEnabled(true);
-						container.setIsobaric();
-					}
-				});
+				this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+				this.add(tempPanel);
+				this.add(volumePanel);
+				this.add(pressurePanel);
 				
 				Timer t = new Timer();
 				t.scheduleAtFixedRate(new TimerTask(){
