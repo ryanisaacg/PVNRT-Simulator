@@ -18,6 +18,7 @@ public class PVNRTUI
 	JSlider tempSlider, volumeSlider, pressureSlider;
 	public JRadioButton tempLock, volumeLock, pressureLock;
 	private DecimalFormat format;
+	private boolean lockEvent = false;
 	
 	public static void main(String[] args)
 	{
@@ -33,9 +34,11 @@ public class PVNRTUI
 	
 	private void refreshSliderValues()
 	{
+		lockEvent = true;
 		tempSlider.setValue((int)container.getTemperature());
 		volumeSlider.setValue((int)container.getVolume());
 		pressureSlider.setValue((int)container.getPressure());
+		lockEvent = false;
 	}
 	
 	public PVNRTUI()
@@ -44,9 +47,9 @@ public class PVNRTUI
 		tempLabel = new JLabel();
 		volumeLabel = new JLabel();
 		pressureLabel = new JLabel();
-		tempSlider = new JSlider(1, 500, 1);
-		volumeSlider = new JSlider(1, 1000, 1);
-		pressureSlider = new JSlider(1, 1000, 1);
+		tempSlider = new JSlider(1, 500, (int)container.getTemperature());
+		volumeSlider = new JSlider(1, 1000, (int)container.getVolume());
+		pressureSlider = new JSlider(1, 1000, (int)container.getPressure());
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(tempLock = new JRadioButton("Isothermic"));
 		bg.add(volumeLock = new JRadioButton("Isochoric"));
@@ -79,19 +82,53 @@ public class PVNRTUI
 				this.add(pressureLock);
 
 				tempSlider.addChangeListener(e -> {
+					if(lockEvent) return;
 					container.setTemperature(tempSlider.getValue());
 					refreshLabelValues();
 					refreshSliderValues();
 				});
 				volumeSlider.addChangeListener(e -> {
+					if(lockEvent) return;
 					container.setVolume(volumeSlider.getValue());
 					refreshLabelValues();
 					refreshSliderValues();
 				});
 				pressureSlider.addChangeListener(e -> {
+					if(lockEvent) return;
 					container.setPressure(pressureSlider.getValue());
 					refreshLabelValues();
 					refreshSliderValues();
+				});
+				tempLock.addChangeListener(e -> 
+				{
+					if(tempLock.isSelected())
+					{
+						volumeSlider.setEnabled(true);
+						pressureSlider.setEnabled(true);
+						tempSlider.setEnabled(false);
+						container.setIsothermal();
+					}
+				});
+				volumeLock.addChangeListener(e -> 
+				{
+					if(volumeLock.isSelected())
+					{
+						volumeSlider.setEnabled(false);
+						pressureSlider.setEnabled(true);
+						tempSlider.setEnabled(true);
+						container.setIsochoric();
+					}
+				});
+				pressureLock.addChangeListener(e -> 
+				{
+					if(pressureLock.isSelected())
+					{
+						System.out.println("!");
+						volumeSlider.setEnabled(true);
+						pressureSlider.setEnabled(false);
+						tempSlider.setEnabled(true);
+						container.setIsobaric();
+					}
 				});
 				
 				Timer t = new Timer();
