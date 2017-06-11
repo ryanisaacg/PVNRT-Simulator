@@ -42,6 +42,8 @@ public class PVNRTUI
 		JFrame frame = new JFrame("PV = nRT");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		PVNRTUI pvnrtUI = this;
+		
 		frame.getContentPane().add(new JPanel(){
 			private static final long serialVersionUID = -8266151342944832435L;
 			
@@ -63,7 +65,6 @@ public class PVNRTUI
 					{
 						temperature = tempSlider.getValue();
 						tempLabel.setText(temperature + " K");
-						PVNRT.update(p);
 						refresh();
 					}
 				});
@@ -72,7 +73,6 @@ public class PVNRTUI
 					{
 						volume = volumeSlider.getValue();
 						volumeLabel.setText(volume + " m^3");
-						PVNRT.update(p);
 						refresh();
 					}
 				});
@@ -81,7 +81,6 @@ public class PVNRTUI
 					{
 						pressure = pressureSlider.getValue();
 						pressureLabel.setText(pressure+ " kPa");
-						PVNRT.update(p);
 						refresh();
 					}
 				});
@@ -91,6 +90,8 @@ public class PVNRTUI
 					public void run()
 					{
 						p.repaint();
+						PVNRT.update(pvnrtUI);
+						refresh();
 					}
 				}, 0, 1000/60);
 				
