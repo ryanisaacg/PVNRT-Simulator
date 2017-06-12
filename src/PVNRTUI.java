@@ -54,19 +54,19 @@ public class PVNRTUI
 		JPanel tempPanel = new JPanel();
 		tempPanel.setLayout(new BoxLayout(tempPanel, BoxLayout.X_AXIS));
 		tempPanel.add(tempLabel = new JLabel());
-		tempPanel.add(tempSlider = new JSlider(1, 500, (int)container.getTemperature()));
+		tempPanel.add(tempSlider = new JSlider(3, 500, (int)container.getTemperature()));
 		tempPanel.add(tempLock);
 		//Create the volume controls
 		JPanel volumePanel = new JPanel();
 		volumePanel.setLayout(new BoxLayout(volumePanel, BoxLayout.X_AXIS));
 		volumePanel.add(volumeLabel = new JLabel());
-		volumePanel.add(volumeSlider = new JSlider(1, 1000, 1));
+		volumePanel.add(volumeSlider = new JSlider(3, 1000, 3));
 		volumePanel.add(volumeLock);
 		//Create the pressure controls
 		JPanel pressurePanel = new JPanel();
 		pressurePanel.setLayout(new BoxLayout(pressurePanel, BoxLayout.X_AXIS));
 		pressurePanel.add(pressureLabel = new JLabel());
-		pressurePanel.add(pressureSlider = new JSlider(1, 1000, 1));
+		pressurePanel.add(pressureSlider = new JSlider(3, 1000, 3));
 		pressurePanel.add(pressureLock);
 		
 		tempLock.setSelected(true);
